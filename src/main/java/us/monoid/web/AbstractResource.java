@@ -95,6 +95,19 @@ public abstract class AbstractResource extends Resty {
 			return false;
 	}
 
+	public Integer getHTTPStatus() {
+		if (urlConnection instanceof HttpURLConnection) {
+			HttpURLConnection http = (HttpURLConnection) urlConnection;
+			try {
+				return new Integer(http.getResponseCode());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return null;
+	}
+
 	/**
 	 * Get the location header as URI. Returns null if there is no location header.
 	 * 
