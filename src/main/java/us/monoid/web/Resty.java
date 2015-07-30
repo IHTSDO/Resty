@@ -220,7 +220,10 @@ public class Resty {
 		return doPOSTOrPUT(anUri, requestContent, createJSONResource());
 	}
 
-	/** @see Resty#json(URI, Content) */
+	/**
+	 * @throws IOException
+	 * @see Resty#json(URI, Content)
+	 */
 	public JSONResource json(String anUri, AbstractContent content) throws IOException {
 		return json(URI.create(anUri), content);
 	}
