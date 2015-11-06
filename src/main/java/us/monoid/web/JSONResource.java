@@ -8,7 +8,6 @@ import us.monoid.json.JSONException;
 import us.monoid.json.JSONObject;
 import us.monoid.json.JSONArray;
 import us.monoid.json.JSONTokener;
-import us.monoid.web.jp.javacc.ParseException;
 
 
 /** A resource presentation in JSON format.
@@ -126,7 +125,13 @@ public class JSONResource extends AbstractResource {
 	 * Gets the partial JSON object or attribute as specified in the path expression.
 	 */
 	public Object get(String path) throws Exception {
-		return new JSONPathQuery(path).eval(this);
+		try {
+			return new JSONPathQuery(path).eval(this);
+		} catch (Exception e) {
+			String msg = "Failed to recover " + path + " from " + this.location();
+			msg += " probably due to receiving HTTP " + this.getHTTPStatus();
+			throw new Exception(msg, e);
+		}
 	}
 	
 	/**
