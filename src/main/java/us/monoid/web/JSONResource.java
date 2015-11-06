@@ -29,7 +29,7 @@ public class JSONResource extends AbstractResource {
 	/**
 	* Parse and return JSON array. Parsing is done only once after which the inputStream is at EOF.
 	*/
-	public JSONArray array() throws IOException, JSONException {
+	public JSONArray array() throws Exception {
 		if(json == null) unmarshal();
 		return (JSONArray)json;
 	}
@@ -37,10 +37,8 @@ public class JSONResource extends AbstractResource {
 	/** 
 	 * Parse and return JSON object. Parsing is done only once after which the inputStrem is at EOF.
 	 * @return the JSON object
-	 * @throws IOException
-	 * @throws JSONException
 	 */
-	public JSONObject object() throws IOException, JSONException {
+	public JSONObject object() throws Exception {
 		if (json == null) unmarshal();
 		return (JSONObject)json;
 	}
@@ -51,81 +49,94 @@ public class JSONResource extends AbstractResource {
 	 * @throws IOException 
 	 * @throws JSONException if data was no valid JSON
 	 */
-	public JSONObject toObject() throws IOException, JSONException {
+	public JSONObject toObject() throws Exception {
 		return object();
 	}
 	
 	/** Transforming the JSON on the fly */
-	protected Object unmarshal() throws IOException, JSONException {
+	protected Object unmarshal() throws Exception {
 		json = new JSONTokener(new InputStreamReader(inputStream, "UTF-8")).nextValue();
 		inputStream.close();
 		return json;
 	}
 
-	/** Execute the given path query on the json GET the returned URI expecting JSON
+	/**
+	 * Execute the given path query on the json GET the returned URI expecting JSON
 	 * 
-	 * @param path path to the URI to follow
+	 * @param path
+	 *            path to the URI to follow
 	 * @return a new resource, as a result of getting it from the server in JSON format
-	 * @throws Exception 
-	 * @throws JSONException 
 	 */
 	public JSONResource json(JSONPathQuery path) throws Exception {
 		Object jsonValue = path.eval(this);
 		return json(jsonValue.toString());
 	}
 	
-	/** Execute the given path query on the json and POST to the returned URI expecting JSON
+	/**
+	 * Execute the given path query on the json and POST to the returned URI expecting JSON
 	 * 
-	 * @param path path to the URI to follow
+	 * @param path
+	 *            path to the URI to follow
 	 * @return a new resource, as a result of getting it from the server in JSON format
-	 * @throws Exception 
-	 * @throws JSONException 
 	 */
 	public JSONResource json(JSONPathQuery path, Content content) throws Exception {
 		Object jsonValue = path.eval(this);
 		return json(jsonValue.toString(), content);
 	}
 
-	/** Execute the given path query on the json and use the returned string as an URI expecting text/*
+	/**
+	 * Execute the given path query on the json and use the returned string as an URI expecting text/*
 	 * 
-	 * @param path path to the URI to follow
+	 * @param path
+	 *            path to the URI to follow
 	 * @return a new resource, as a result of getting it from the server in text/plain format
-	 * @throws Exception 
-	 * @throws JSONException 
 	 */
 	public TextResource text(JSONPathQuery path) throws Exception {
 		Object jsonValue = path.eval(this);
 		return text(URI.create(jsonValue.toString()));
 	}
 
-	/** Execute the given path query on the json and GET the returned URI expecting text/*
+	/**
+	 * Execute the given path query on the json and GET the returned URI expecting text/*
 	 * 
-	 * @param path path to the URI to follow
+	 * @param path
+	 *            path to the URI to follow
 	 * @return a new resource, as a result of getting it from the server in JSON format
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public XMLResource xml(JSONPathQuery path) throws Exception {
 		Object jsonValue = path.eval(this);
 		return xml(jsonValue.toString());
 	}
 	
-	/** Execute the given path query on the json and POST to the returned URI expecting text/*
+	/**
+	 * Execute the given path query on the json and POST to the returned URI expecting text/*
 	 * 
-	 * @param path path to the URI to follow
+	 * @param path
+	 *            path to the URI to follow
 	 * @return a new resource, as a result of getting it from the server in JSON format
-	 * @throws Exception 
 	 */
 	public XMLResource xml(JSONPathQuery path, Content content) throws Exception {
 		Object jsonValue = path.eval(this);
 		return xml(jsonValue.toString(), content);
 	}
 	
-	/** Gets the partial JSON object or attribute as specified in the path expression.*/
+	/**
+	 * Gets the partial JSON object or attribute as specified in the path expression.
+	 */
 	public Object get(String path) throws Exception {
-		return new JSONPathQuery(path).eval(this);
+		try {
+			return new JSONPathQuery(path).eval(this);
+		} catch (Exception e) {
+			String msg = "Failed to recover " + path + " from " + this.location();
+			msg += " probably due to receiving HTTP " + this.getHTTPStatus();
+			throw new Exception(msg, e);
+		}
 	}
 	
-	/** Gets the partial JSON object or attribute as specified in the path expression.*/
+	/**
+	 * Gets the partial JSON object or attribute as specified in the path expression.
+	 */
 	public Object get(JSONPathQuery aQuery) throws Exception {
 		return aQuery.eval(this);
 	}

@@ -36,7 +36,7 @@ public class JSONPathQuery extends PathQuery<JSONResource, Object> {
 	}
 	
 	@Override
-	Object eval(JSONResource resource) throws JSONException, ParseException, IOException {
+	Object eval(JSONResource resource) throws Exception {
 		JSONObject json = resource.object();
 		log.fine("JSON Received:" + json);
 		Object result = getCompiler().json().eval(json);
